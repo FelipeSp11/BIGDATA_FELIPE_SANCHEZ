@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="bigdata_actividad1",
+    name="BIGDATA_FELIPE_SANCHEZ",
     version="0.0.1",
     author="Felipe Sánchez",
     author_email="leon.sanchez@est.iudigital.edu.co",
