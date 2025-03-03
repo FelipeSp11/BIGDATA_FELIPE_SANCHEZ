@@ -72,7 +72,6 @@ class Ingestion:
         print("Datos guardados en la base de datos con éxito")
 
     def auditoria_datos(self, url):
-        # Obtener datos de la API
         datos_api = self.obtener_datos_api(url)
         registros_api = datos_api.get("data", [])
         
@@ -80,20 +79,20 @@ class Ingestion:
             print("No se obtuvieron datos de la API")
             return
         
-        # Contar registros y columnas de la API
+       
         cantidad_registros_api = len(registros_api)
         cantidad_columnas_api = len(registros_api[0]) if cantidad_registros_api > 0 else 0
         print(f"Registros obtenidos de la API: {cantidad_registros_api}, Columnas: {cantidad_columnas_api}")
         
-        # Verificar en la base de datos
+       
         conexion = sqlite3.connect(self.db_path)
         cursor = conexion.cursor()
         
-        # Contar registros
+       
         cursor.execute("SELECT COUNT(*) FROM datos")
         cantidad_registros_db = cursor.fetchone()[0]
         
-        # Contar columnas
+       
         cursor.execute("PRAGMA table_info(datos)")
         cantidad_columnas_db = len(cursor.fetchall())
         
@@ -101,7 +100,7 @@ class Ingestion:
         
         print(f"Registros en la base de datos: {cantidad_registros_db}, Columnas: {cantidad_columnas_db}")
         
-        # Validación
+        
         if cantidad_registros_api != cantidad_registros_db:
             print("Advertencia: Diferencia en la cantidad de registros entre la API y la base de datos.")
         
