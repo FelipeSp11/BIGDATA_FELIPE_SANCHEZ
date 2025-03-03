@@ -27,7 +27,11 @@ class Ingestion:
                 sell REAL,
                 open REAL,
                 date INTEGER,
-                pair TEXT
+                pair TEXT,
+                market_cap REAL,
+                circulating_supply REAL,
+                total_supply REAL,
+                rank INTEGER
             )
         ''')
         conexion.commit()
@@ -52,19 +56,59 @@ class Ingestion:
         
         for ticker in datos:
             cursor.execute("""
-                INSERT INTO datos (moneda, metodo, high, low, vol, last, buy, sell, open, date, pair) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO datos (moneda, metodo, high, low, vol, last, buy, sell, open, date, pair, market_cap, circulating_supply, total_supply, rank) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 ticker.get("moneda", ""), ticker.get("metodo", ""),
                 float(ticker.get("high", 0)), float(ticker.get("low", 0)), float(ticker.get("vol", 0)),
                 float(ticker.get("last", 0)), float(ticker.get("buy", 0)), float(ticker.get("sell", 0)),
-                float(ticker.get("open", 0)), int(ticker.get("date", 0)), ticker.get("pair", "")
+                float(ticker.get("open", 0)), int(ticker.get("date", 0)), ticker.get("pair", ""),
+                float(ticker.get("market_cap", 0)), float(ticker.get("circulating_supply", 0)), float(ticker.get("total_supply", 0)),
+                int(ticker.get("rank", 0))
             ))
         
         conexion.commit()
         conexion.close()
         print("Datos guardados en la base de datos con éxito")
 
+    def auditoria_datos(self, url):
+        # Obtener datos de la API
+        datos_api = self.obtener_datos_api(url)
+        registros_api = datos_api.get("data", [])
+        
+        if not registros_api:
+            print("No se obtuvieron datos de la API")
+            return
+        
+        # Contar registros y columnas de la API
+        cantidad_registros_api = len(registros_api)
+        cantidad_columnas_api = len(registros_api[0]) if cantidad_registros_api > 0 else 0
+        print(f"Registros obtenidos de la API: {cantidad_registros_api}, Columnas: {cantidad_columnas_api}")
+        
+        # Verificar en la base de datos
+        conexion = sqlite3.connect(self.db_path)
+        cursor = conexion.cursor()
+        
+        # Contar registros
+        cursor.execute("SELECT COUNT(*) FROM datos")
+        cantidad_registros_db = cursor.fetchone()[0]
+        
+        # Contar columnas
+        cursor.execute("PRAGMA table_info(datos)")
+        cantidad_columnas_db = len(cursor.fetchall())
+        
+        conexion.close()
+        
+        print(f"Registros en la base de datos: {cantidad_registros_db}, Columnas: {cantidad_columnas_db}")
+        
+        # Validación
+        if cantidad_registros_api != cantidad_registros_db:
+            print("Advertencia: Diferencia en la cantidad de registros entre la API y la base de datos.")
+        
+        if cantidad_columnas_api != cantidad_columnas_db:
+            print("Advertencia: Diferencia en la cantidad de columnas entre la API y la base de datos.")
+        
+        print("Auditoría completada.")
 
 ingestion = Ingestion()
 url = "https://api.coinlore.net/api/tickers/"
@@ -83,11 +127,17 @@ if "data" in datos:
             "sell": item.get("price_btc", 0),
             "open": item.get("price_usd", 0),
             "date": item.get("ts", 0),
-            "pair": f"USD{item.get('symbol', '')}"
+            "pair": f"USD{item.get('symbol', '')}",
+            "market_cap": item.get("market_cap_usd", 0),
+            "circulating_supply": item.get("csupply", 0),
+            "total_supply": item.get("tsupply", 0),
+            "rank": item.get("rank", 0)
         }
         for item in datos["data"]
     ]
     
     ingestion.guardar_db(datos=registros)
+    ingestion.auditoria_datos(url)
 else:
     print("No se obtuvo la consulta")
+
