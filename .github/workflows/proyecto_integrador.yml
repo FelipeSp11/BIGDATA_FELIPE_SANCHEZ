@@ -1,0 +1,79 @@
+name: Ingesta de datos
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    permissions:
+      contents: write
+
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+         python-version: '3.9.2'
+      - name: paso1 - crea entorno virtual
+        run: python -m venv venv
+      - name: paso2 - activar entorno virtual
+        run: ./venv/Scripts/activate
+      - name: paso3 - actualizar pip
+        run: pip install --upgrade pip
+      - name: paso4 - instalar dependencias
+        run: pip install -e .
+      - name: paso5 - Ejercutar script
+        run: python src/bigdata/static/ingesta.py
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    permissions:
+      contents: write
+
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+         python-version: '3.9.2'
+      - name: paso1 - crea entorno virtual
+        run: python -m venv venv
+      - name: paso2 - activar entorno virtual
+        run: ./venv/Scripts/activate
+      - name: paso3 - actualizar pip
+        run: pip install --upgrade pip
+      - name: paso4 - instalar dependencias
+        run: pip install -e .
+      - name: paso5 - Ejercutar script
+        run: python src/IBD/ingestion.py
+
+      - name: Commit and Push changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: Generacion informe json
+          commit_user_name: Felipe Sanchez [GitHub Antions]
+          commit_user_email: leon.sanchez@est.iudigital.edu.co
+          commit_author: Felipe Sanchez <leon.sanchez@est.iudigital.edu.co>
+        
+
+      - name: Commit and Push changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: Generacion informe json
+          commit_user_name: Felipe Sanchez [GitHub Antions]
+          commit_user_email: leon.sanchez@est.iudigital.edu.co
+          commit_author: Felipe Sanchez <leon.sanchez@est.iudigital.edu.co>
+        
