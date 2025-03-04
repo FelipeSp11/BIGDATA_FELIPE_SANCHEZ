@@ -32,7 +32,7 @@ jobs:
         run: pip install -e . 
 
       - name: Ejecutar script
-        run: python src/bigdata/static/ingestion.py  
+        run: python src/IBD/ingestion.py  
 
       - name: Commit and Push changes
         uses: stefanzweifel/git-auto-commit-action@v5  
